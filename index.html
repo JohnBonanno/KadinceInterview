@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- <link rel="stylesheet" href="https://linktostyles.css"> -->
+	<!-- <script src="https:linktojavascriptfile.js" crossorigin="JB"> -->
+		<!-- maybe it would be fruitful to use separate file for js and css  -->
+
+<!-- 1. Begin the assignment by sending a link to the repository in a reply to this email no later than Thursday, July 1st.
+
+2. Build the implementation in 1 week while meeting at least the minimum functionality requirements:
+- View a list of to-do items with the ability to filter the list by pending, complete, and all to-dos
+- Create a new to-do item
+- Edit a to-do item
+- Delete a to-do item
+- Complete a to-do item
+
+3. Complete the assignment by sending the deployed application link in a reply to this email no later than Thursday, July 8th. -->
+
+
+<title>To-Do List Manager</title>
+
+<style>
+	h1{font-style: arial;}
+	input[type=text], select {
+		box-sizing: border-box;
+		width: 45%;
+		border-radius: 25px;
+	}
+
+	button[type=submit] {
+		background-color: green;
+	}
+
+	.submit{
+		color: black;
+		background: white;
+		border-radius: 25px;	
+
+	}
+	.submit:hover {
+		background: LightGreen;
+	}
+	.input{
+		margin-right: 0px;
+		position: relative;
+		right: 0;
+
+	}
+	ul{
+		width: 45%;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		font-family: Tahoma, sans-serif;
+
+	}
+
+	ul li:nth-child(odd)
+	{
+		background-color: LightGrey;
+	}
+	ul li:hover {
+		background: LightGreen;
+	}
+	li {
+		margin-left: 20px;
+		position: relative;
+		border-radius: 25px;
+
+	}
+	span {
+		margin-right: 0px;
+		position: absolute;
+		right: 0;
+		background-color: #CD5C5C;
+				border-radius: 25px;
+
+
+	}
+	span:hover{
+		background-color: red;
+	}
+	edit {
+		margin-right: 40px;
+		position: absolute;
+		right: 0;
+		background-color: Gray;
+		border-radius: 5px;
+
+	}
+	edit:hover{
+		background-color: Green;
+	}
+
+
+	ul li.checked {
+		background: Yellow;
+		color: black;
+		font-style: bold;
+		text-decoration-thickness: auto;
+		text-decoration: line-through;
+
+	}
+	ul li.checked:hover {
+		background-color: LightGreen;
+	}
+
+	ul li.finished {
+		background: Green;
+		color: black;
+		font-style: bold;
+		text-decoration-thickness: auto;
+		text-decoration: line-through;
+	}
+	ul li.finished:hover {
+		background-color: Green;
+	}
+
+
+	div {
+		width: 45%;
+		border-radius: 5px;
+		background-color: #f2f2f2;
+		padding: 20px;
+		margin: auto;
+	}
+
+	h1,h3,.selector{  font-family: Arial, Helvetica, sans-serif;
+
+		font-color: white;}
+
+	</style>
+</head>
+
+<body>
+	<div>
+		<center>
+
+			<h1> Welcome to the to-do list manager </h1>
+
+
+			<div class="selector">
+				<input type="checkbox" id="pending" name="pendng" value="pending" onclick="display(this)">
+				<label for="vehicle1">Display Pending</label><br>
+				<input type="checkbox" id="completed" name="completed" value="completed" onclick="display2(this)">
+				<label for="vehicle2">Display Completed</label><br>
+			</div>
+
+
+			<center>
+				<img src="https://i.imgur.com/1gTKJeD.jpg" width="300" height="200">
+				<h3> current to-do items: </h3>
+			</center>
+
+			<input type = "submit" class= "submit" onclick="add()">
+			<input type="text" id="inputField" size = "40" placeholder="Describe your to do list item here...">
+
+			<ul id="todoList">
+			</ul>
+
+		</center>
+	</div>
+</body>
+
+
+
+<script>
+	//when a list item is single clicked it becomes a pending item
+	document.querySelector('ul').addEventListener('click', function(ev) {
+	if (ev.target.tagName === 'LI') {
+		ev.target.classList.toggle('checked');
+	}			
+	}, false);
+	//when a list item is double clicked it becomes a completed item
+	document.querySelector('ul').addEventListener('dblclick', function(ev) {
+	if (ev.target.tagName === 'LI') {
+		ev.target.classList.toggle('finished');
+	}			
+	}, false);
+
+
+
+function add() {
+
+	//if the filters are applied while adding new (non pending nor completed items) they will be hidden (see 238 )
+  	var pendingBox = document.getElementById('pending').checked;
+  	var completedBox = document.getElementById('completed').checked;
+
+
+	//this block will add a new list element to the element with id "todoList"
+	//create list object
+	let itemToAdd = document.createElement( "LI" );
+	//get value from text field and put it in a textNode
+	let newItem = document.createTextNode(document.getElementById("inputField").value );
+
+	//update our var itemToAdd to contain the txtField value (as stored in textNode)
+	itemToAdd.appendChild(newItem);
+
+	//create a span to contain our item - delete button
+	let exitSpan = document.createElement( 'span' );
+	exitSpan.appendChild( document.createTextNode( " × " ) );
+	itemToAdd.appendChild( exitSpan );
+	exitSpan.addEventListener( 'click', function () {
+		this.parentElement.remove();
+	} );
+
+	//create class to contain our edit button
+	let editSpan = document.createElement( 'edit' );
+	editSpan.appendChild( document.createTextNode( "EDIT" ) );
+	itemToAdd.appendChild( editSpan );
+
+	editSpan.addEventListener( 'click', function () {
+
+		let p = prompt("Edit your entry");
+
+		while ( p == '' ){
+
+		p = prompt( "Sorry, null is not a valid list item value. Please enter a new list item value. " );
+
+		}
+
+		//if we try and edit a item and then cancel, we want to restore old value
+		//because prompt when finished returns a string, and cancelled returns a null
+		//we will check if null, if else use the string to re-assign new value to li
+		if( p===null ){
+			itemToAdd.innerText =this.parentElement.childNodes[ 1 ].childNodes[ 1 ].value;
+			itemToAdd.appendChild( exitSpan );
+			itemToAdd.appendChild( editSpan );
+			return;
+		}
+		else{
+			itemToAdd.innerText=p;
+		}
+		itemToAdd.appendChild( exitSpan );
+		itemToAdd.appendChild( editSpan );
+	} );
+
+
+
+	//this is where we need to check to make sure that the input field value is not null
+	if( document.getElementById( "inputField" ).value != ''){
+
+		//this is where we insure no filters are applied when adding new li
+		if(pendingBox||completedBox){
+			itemToAdd.style.visibility = 'hidden';
+		}
+		
+		todoList.appendChild( itemToAdd );
+
+	}
+
+}
+
+//this display funx gets called on click of 
+//[show pending] checkbox
+
+function display( element ) {
+  let myNodelist = document.getElementsByTagName( "LI" );
+  var pendingBox = document.getElementById('pending').checked;
+  var completedBox = document.getElementById('completed').checked;
+
+
+  for ( let i = 0; i < myNodelist.length ; i++){
+  	if( element.checked ){
+  		if( (myNodelist[i].classList.contains('checked') ) || completedBox && myNodelist[i].classList.contains('finished') ){
+  			myNodelist[i].style.visibility = 'visible';
+  		}
+  		else{myNodelist[i].style.visibility = 'hidden';}
+  	}
+  	else{
+  		if(!completedBox){
+  			myNodelist[i].style.visibility = 'visible';
+  		}
+
+  		else if(myNodelist[i].classList.contains('finished')){
+  			myNodelist[i].style.visibility = 'visible';
+  		}
+  		else{myNodelist[i].style.visibility = 'hidden';}
+  	}
+  }
+
+}
+
+//this display funx gets called on click of 
+//[show completed] checkbox
+
+function display2( element ) {
+	let myNodelist = document.getElementsByTagName( "LI" );
+	var pendingBox = document.getElementById('pending').checked;
+	var completedBox = document.getElementById('completed').checked;
+	for ( let i = 0; i < myNodelist.length ; i++){
+		if( element.checked ){
+			if( (myNodelist[i].classList.contains('finished') ) || pendingBox && myNodelist[i].classList.contains('checked')){
+				myNodelist[i].style.visibility = 'visible';
+			}
+			else{myNodelist[i].style.visibility = 'hidden';}
+		}
+		else{
+			if(!pendingBox){
+				myNodelist[i].style.visibility = 'visible';
+			}
+			else if(myNodelist[i].classList.contains('checked')){
+				myNodelist[i].style.visibility = 'visible';
+			}
+			else{myNodelist[i].style.visibility = 'hidden';}
+		}
+
+	}
+}
+
+
+
+</script>
+
+</html>
+
